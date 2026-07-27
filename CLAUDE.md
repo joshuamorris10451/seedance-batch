@@ -111,6 +111,10 @@ slow tasks, so pool failover is genuinely exercised.
 
 - **Bob has no BytePlus key yet** — nothing has hit the live API. First real run should be a
   single 5s 720p clip to measure true cost from the `usage` block before any volume.
+  **A BytePlus account is no longer the blocker**: a legitimate fal.ai signup ($10, no card) is
+  ~6 free 720p clips today. The `provider` field in `pool.py` is designed for it but the fal
+  adapter is **NOT implemented** — that's the ~1h of work standing between the tool and a free
+  live run. Awaiting Bob's go.
 - **Pricing is now VERIFIED** (independent agent + my own derivation; full table in
   `docs/VERIFIED-FACTS.md` §5). Headline: **5s @720p = $0.76** on the flagship 2.0, **$1.87 at
   1080p**, $0.38 on mini, $0.10 on 1.0-pro-fast. Formula
@@ -118,9 +122,19 @@ slow tasks, so pool failover is genuinely exercised.
   **Going direct beats every reseller for the 2.0 family** — fal.ai charges exactly 2×.
   Note the verification *corrected* my own first derivation ($0.69 → $0.76); don't re-derive
   from the China CNY rate, use the BytePlus USD card.
-- Free tier is **500K tokens/model officially** (byteplus.com markets "2m" on the Seedance page;
-  exact grant is console-only and UNVERIFIED). That's ~4–18 clips of 5s/720p, i.e. a fresh
-  account is worth **$3.50–$14 of footage, once** — the number that kills the farming idea.
+- Free tier **RESOLVED 2026-07-27** (Bob pushed back; he was right). Grant is **500K tokens PER
+  MODEL**, counted separately per model, shared across sub-accounts — so the marketed "2m" is
+  500K × several models. **24 clips of 5s/720p per verified account = $9.44, once** (60 clips at
+  480p). Requires **identity verification**; same phone / same ID doc / same account ID are
+  explicitly "the same user", and "bulk abuse" is a named disqualifier. Sources + table in
+  `docs/VERIFIED-FACTS.md` §5.
+- ⚠ **I got one argument wrong and it's now corrected on the live page:** the brief claimed
+  farming risked Bob's client Google Ads via ban cascade. That's the *Veo/Flow* risk model —
+  BytePlus is ByteDance and cannot touch a Google account. Don't repeat it.
+- **Reseller signup credits are the easier free door**, and are what rival "Seedance batch tool"
+  sellers actually advertise as a 5–10 video trial: **fal.ai $10, no credit card** (~6 clips at
+  720p), WaveSpeed/Replicate smaller, Higgsfield 24h promos — email only, **no ID check**. They
+  are not farming; it's their own paid credit as a lead magnet for a subscription.
 - Reseller adapters (fal.ai, Segmind, WaveSpeed, Replicate) are designed for in `pool.py`
   (`provider` field) but **not implemented** — only `byteplus` works today. Worth adding if
   BytePlus suspends again (the copyright dispute is unresolved; studios sent C&Ds, no lawsuit

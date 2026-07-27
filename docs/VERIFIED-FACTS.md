@@ -208,11 +208,48 @@ costs about 2.1× a 1080p one.
 rate ($0.014/1K vs $0.007/1K), WaveSpeed ~60% over, Kie.ai ~35% over. For the older 1.x family
 that inverts — Kie undercuts official by 30–45% (1.0-pro-fast 720p 5s at $0.08).
 
-**Free tier:** officially **500,000 tokens per eligible model, once per account** (Free-Token
-Campaign T&Cs; "Free Tokens Only" mode caps at the same 500k). byteplus.com's Seedance page
-markets "free trial of 2m tokens". The exact per-model grant is behind console login and is
-**UNVERIFIED**. Either way: 500K ≈ 4 clips of 720p/5s on 2.0; 2M ≈ 18 clips. So a fresh account
-is worth roughly **$3.50–$14 of footage, once**.
+**Free tier — RESOLVED 2026-07-27** (was previously marked unverified; Bob pushed back that a
+trial covers 5–10 videos, and he was right). Primary sources, extracted from the JS-rendered Lark
+docs:
+
+- `docs.byteplus.com/en/docs/ModelArk/1399514` (Inference free trial): *"Free inference quota is
+  calculated **separately for different models** and shared under the primary account."* Worked
+  example in the doc uses 500 (k tokens) per model. Sub-accounts do **not** multiply it.
+- `docs.byteplus.com/en/docs/ModelArk/1465347` (Free Tokens Only mode): *"calls to the inference
+  API consume only the **500k free tokens** granted by the platform"*, available to *"identity-
+  verified personal accounts and enterprise accounts"*. One-way switch — once disabled it cannot
+  be re-enabled.
+- `docs.byteplus.com/en/docs/ModelArk/1928265`: *"If multiple accounts are associated with the same
+  mobile phone number, the same identification document, the same account ID … they will be
+  regarded as the same user."* Plus explicit reservation of the right to disqualify *"resource
+  hoarding, bulk abuse"*.
+
+So the marketed "2m tokens" is **500k × several models**, not 2m on one. Per verified account, at
+5s/720p (108,000 tokens per clip — 4 whole clips per model):
+
+| Model | free clips | value |
+|---|---|---|
+| `dreamina-seedance-2-0-260128` | 4 | $3.04 |
+| `dreamina-seedance-2-0-fast-260128` | 4 | $2.40 |
+| `dreamina-seedance-2-0-mini-260615` | 4 | $1.52 |
+| `seedance-1-5-pro-251215` | 4 | $1.04 |
+| `seedance-1-0-pro-250528` | 4 | $1.04 |
+| `seedance-1-0-pro-fast-251015` | 4 | $0.40 |
+| **total** | **24 clips** | **$9.44, once** |
+
+At 480p (~48,038 tok/clip) it's ~10 clips per model ≈ **60 clips per account**. Bob's "5–10
+videos" was accurate and conservative.
+
+**Reseller signup credits are the easier free door** and are what rival batch tools actually
+advertise: fal.ai gives new accounts **$10 with no credit card** (≈6 Seedance 720p clips at their
+2× rate), WaveSpeed and Replicate give smaller no-card grants, Higgsfield runs periodic
+unlimited-24h promos. Email only, **no identity check** — unlike BytePlus. Those sellers are not
+farming; the free clips are their own paid credit used as a lead magnet for a subscription.
+
+⚠ **Corrected reasoning:** an earlier version of the brief argued farming risked Bob's client
+Google Ads via multi-account ban cascade. That was imported from the Veo/Flow context and is
+**wrong here** — BytePlus is ByteDance and cannot touch a Google account. The real blockers are
+identity verification and the same-identity clause above.
 
 Still unverified: minimum-token floors when input includes video (Lark wiki behind login), and
 the 480p pixel basis for the 2.0 family ($0.35/5s back-solves to 50,000 tokens, which matches no

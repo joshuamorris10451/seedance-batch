@@ -231,10 +231,28 @@ footer b{color:var(--muted)}
 
     <div class="note bad">
       <h4>So what is a farmed account actually worth?</h4>
-      <p>Officially BytePlus grants <b>500,000 free tokens per model</b>; their Seedance page markets
-        "2m tokens". Run that through the same formula and a fresh account yields somewhere between
-        <b>4 and 18 clips</b> of 5s/720p — call it <b>$3.50 to $14 of footage, once</b>. Then the
-        account is spent and worth nothing.</p>
+      <p><b>Corrected 2026-07-27 — the free tier is bigger than I first wrote.</b> BytePlus grants
+        500,000 free tokens <em>per model</em>, and the quota is
+        <a href="https://docs.byteplus.com/en/docs/ModelArk/1399514">counted separately for each
+        model</a>. That's the "2m tokens" the marketing page means — not 2m on one model, but 500k
+        on each of several. Six Seedance video models are eligible, so one verified account is worth:</p>
+      <div class="scroll">
+      <table>
+        <thead><tr><th>Model</th><th>Free 5s clips @720p</th><th>Retail value</th></tr></thead>
+        <tbody>
+          <tr><td><code>dreamina-seedance-2-0-260128</code></td><td>4</td><td>$3.04</td></tr>
+          <tr><td><code>dreamina-seedance-2-0-fast-260128</code></td><td>4</td><td>$2.40</td></tr>
+          <tr><td><code>dreamina-seedance-2-0-mini-260615</code></td><td>4</td><td>$1.52</td></tr>
+          <tr><td><code>seedance-1-5-pro-251215</code></td><td>4</td><td>$1.04</td></tr>
+          <tr><td><code>seedance-1-0-pro-250528</code></td><td>4</td><td>$1.04</td></tr>
+          <tr><td><code>seedance-1-0-pro-fast-251015</code></td><td>4</td><td>$0.40</td></tr>
+          <tr><td><b>Total per account</b></td><td><b>24 clips</b></td><td><b>$9.44, once</b></td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p>Drop to 480p and each model gives ~10 clips instead of 4 — about <b>60 clips per account</b>.
+        So "enough credits for 5–10 videos" is not marketing spin; it is <b>accurate, and if anything
+        conservative</b>. The ceiling is real all the same: then the account is spent and worth nothing.</p>
       <p>Now price acquiring it. Multilogin — a company that <em>sells</em> the anti-detection tooling —
         publishes a <b>40% success rate</b> for creating a single Google-class account with their paid
         product, under 1% without. So ~2.5 attempts per durable account. Then the costs <em>recur
@@ -271,14 +289,29 @@ footer b{color:var(--muted)}
     </ul>
 
     <div class="note bad">
-      <h4>The specific reason you shouldn't, Bob</h4>
-      <p>Platforms link accounts by device fingerprint, IP reputation and <b>payment fingerprint</b> —
-        including cards from the same issuer and patterns in top-up timing. Google's own terms let it
-        delete the entire Google Account, and a multi-account ban cascades to anything sharing a
-        device, IP or card.</p>
-      <p>You run client Google Ads — RingOnDemand, LendPeak, the GCALIT MCC. The downside here isn't
-        losing a throwaway. It's a ban that reaches accounts you don't own and can't afford to
-        explain. That risk is not worth seven cents a second.</p>
+      <h4>Correction: the Google-ban argument does not apply here</h4>
+      <p>My first version of this page said farming risked your client Google Ads — RingOnDemand,
+        LendPeak, the GCALIT MCC — because a multi-account ban cascades by device, IP and payment
+        fingerprint. <b>That reasoning was imported from the Veo/Flow work and does not belong here.</b>
+        BytePlus is ByteDance. Farming BytePlus accounts cannot touch a Google account. Scratch it.</p>
+      <p>What actually blocks farming on BytePlus is narrower and better evidenced:</p>
+      <ul class="clean">
+        <li><b>Identity verification, not just email + phone.</b> The free quota is only available to
+          <a href="https://docs.byteplus.com/en/docs/ModelArk/1465347">"identity-verified personal
+          accounts and enterprise accounts"</a>. That is a document check, which antidetect browsers
+          and burner numbers do not defeat.</li>
+        <li><b>A same-identity clause, in writing.</b> BytePlus:
+          <a href="https://docs.byteplus.com/en/docs/ModelArk/1928265"><em>"If multiple accounts are
+          associated with the same mobile phone number, the same identification document, the same
+          account ID, or are otherwise determined by BytePlus to be controlled by the same individual
+          or entity, they will be regarded as the same user."</em></a></li>
+        <li><b>Bulk abuse is named as a disqualifier</b> in the same clause — "resource hoarding, bulk
+          abuse" — with the right to disqualify reserved.</li>
+        <li><b>Sub-accounts don't multiply it.</b> The free quota is explicitly "shared under the
+          primary account", with worked arithmetic in the docs to make the point.</li>
+      </ul>
+      <p>So the objection isn't a catastrophic tail-risk any more. It's simpler: you'd be forging
+        identity documents for $9.44 a go.</p>
     </div>
 
     <div class="note">
@@ -286,6 +319,56 @@ footer b{color:var(--muted)}
       <p>Midjourney is the precedent. Its CEO, on the record: <em>"We stopped trials because of massive
         amounts of people making throwaway accounts to get free images."</em> The free tier didn't get
         cheaper. It got removed, permanently, for everyone.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="tc">00:33 · added 2026-07-27</div>
+    <h2>The free trial you're seeing is real — and it isn't farming</h2>
+    <p class="lede">Bob flagged that rival batch tools advertise a trial worth 5–10 videos. They do.
+      But look at whose credits are being spent, because it changes what you should copy.</p>
+
+    <p>There are <b>two different free tiers</b> being conflated, and only one of them needs a
+      BytePlus account at all:</p>
+
+    <ul class="clean">
+      <li><b>The official BytePlus grant</b> — 500k tokens per model, <em>one time</em>, behind
+        identity verification. 24 clips at 720p. This is the one that can't be farmed.</li>
+      <li><b>Reseller signup credits</b> — this is almost certainly what you're looking at. fal.ai
+        gives new accounts <b>$10, no credit card</b>; WaveSpeed and Replicate give smaller signup
+        grants on the same terms; Higgsfield periodically runs unlimited-for-24-hours promos. Email
+        address only. <b>No ID check.</b></li>
+    </ul>
+
+    <div class="note">
+      <h4>What those sellers are actually doing</h4>
+      <p>They are not farming BytePlus. They are running an ordinary SaaS funnel: the "5–10 free
+        videos" is <em>their own</em> paid credit, given away as a lead magnet and priced into the
+        subscription they want to sell you. fal.ai charges exactly 2× the official token rate — a
+        $10 giveaway costs them $5 of real inference, which is cheap customer acquisition for a
+        recurring plan.</p>
+      <p>So the thing worth copying from them is the funnel, not the credits.</p>
+    </div>
+
+    <div class="note good">
+      <h4>The practical consequence for us</h4>
+      <p>You do not need a BytePlus account to start. A single legitimate fal.ai signup is ~6 clips
+        of real Seedance 2.0 at 720p, free, today, with no card and no ID. That is enough to judge
+        whether the model is worth building on — which is the only question open right now.</p>
+      <p>The tool's <code>pool.py</code> already has a <code>provider</code> field for exactly this;
+        the fal.ai adapter is designed but <b>not yet implemented</b>. It is roughly an hour of work
+        and it would let the batch runner spend free reseller credit instead of sitting idle waiting
+        for a BytePlus key.</p>
+    </div>
+
+    <div class="note bad">
+      <h4>What has not changed</h4>
+      <p>None of this scales. Free credit is a way to <em>evaluate</em> the model for nothing, not a
+        way to <em>produce</em> at volume. At 24 clips per verified account and ~6 per reseller
+        signup, a hundred videos a week is a paid line item no matter how you route it — roughly
+        $76/week at 720p on the flagship, or $38 on mini. Budget for that, or self-host on the rig.</p>
     </div>
   </div>
 </section>
