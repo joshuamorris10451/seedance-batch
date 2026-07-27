@@ -8,6 +8,14 @@ ModelArk** API. One key drives both. CSV/JSON in → finished MP4s and PNGs on d
 
 ## Live assets
 - **Research brief (LIVE):** https://joshuamorris10451.github.io/seedance-batch/ — noindex.
+- **VA QA task (LIVE, 2026-07-27):** https://joshuamorris10451.github.io/seedance-qa/ — noindex,
+  **deliberately a separate repo** (`joshuamorris10451/seedance-qa`) so the URL is not one
+  keystroke from the internal brief. Contains only her task: one fal signup, run the 9-test
+  matrix, send back videos + ledger + a filled results table. Says explicitly **one account
+  only, and check with Bob if anyone asks for more**.
+- ⚠ Scrubbed client names (RingOnDemand / LendPeak / GCALIT MCC) out of the public brief on
+  2026-07-27 — they were on a public page and a VA was about to be pointed at the project.
+  **Don't put client names back on anything published.**
 - **Repo:** `joshuamorris10451/seedance-batch` (PUBLIC, needed for Pages). Collaborators:
   SilentAurora245 + mary3862jon. Contains the tool source + the brief in `docs/`.
 - ⚠ **Hosting gotcha, cost me a redo:** I first pushed to `timothywade8452`, whose *user-pages*
@@ -96,6 +104,10 @@ So: **pool API keys you actually hold** (ordinary rate management), don't create
 reproduces the documented wire format plus 429 throttling, quota exhaustion, revoked keys and
 slow tasks, so pool failover is genuinely exercised.
 
+`python3 tests/test_fal.py` → 24 tests for the fal adapter against a mock of fal's queue,
+including the collapsed-polling-path trap, the `Key` vs `Bearer` header, dead-key failover, a
+402 parking the key, and `chain()` refusing on a fal-only pool.
+
 `python3 tests/scale_test.py` → **throughput harness, added 2026-07-27**. Answers "how far can
 batch generation go" without a key or an account. Its mock (unlike `mock_ark.py`) **enforces the
 3-concurrent-per-key cap**, rejecting a 4th simultaneous task with a 429, because concurrency is
@@ -128,12 +140,18 @@ connections the runner holds per in-flight job and stalls the whole run.
 
 ## Open / next
 
-- **Bob has no BytePlus key yet** — nothing has hit the live API. First real run should be a
-  single 5s 720p clip to measure true cost from the `usage` block before any volume.
-  **A BytePlus account is no longer the blocker**: a legitimate fal.ai signup ($10, no card) is
-  ~6 free 720p clips today. The `provider` field in `pool.py` is designed for it but the fal
-  adapter is **NOT implemented** — that's the ~1h of work standing between the tool and a free
-  live run. Awaiting Bob's go.
+- **Nothing has hit a live API yet** — no BytePlus key, no fal key. Everything below is proven
+  against mocks only. The first real run is the VA's 9-test matrix
+  (`examples/fal-trial-matrix.csv`, **$9.07 of a $10 fal trial credit**): model tiers,
+  resolutions, ratios, 10s duration, audio toggle, image-to-video. Every row was validated
+  through the adapter and the whole batch driven end-to-end against a mock of fal's queue, so
+  the commands on the QA page are proven, not guessed.
+- **Bob asked for a VA process to create 5-10 BytePlus accounts; I declined and built the
+  legitimate test instead.** Reason recorded so it isn't relitigated: the free quota needs
+  **identity-verified** accounts and BytePlus collapses same-phone/same-ID accounts into one
+  user, so 5-10 accounts means 5-10 identity documents, with the **VA's** name and number on
+  them, for ~$94 of credit total. The testing goal needs none of it — `scale_test.py` answers
+  throughput for free at any scale, and live-API validation needs exactly one key.
 - **Pricing is now VERIFIED** (independent agent + my own derivation; full table in
   `docs/VERIFIED-FACTS.md` §5). Headline: **5s @720p = $0.76** on the flagship 2.0, **$1.87 at
   1080p**, $0.38 on mini, $0.10 on 1.0-pro-fast. Formula
@@ -154,10 +172,23 @@ connections the runner holds per in-flight job and stalls the whole run.
   sellers actually advertise as a 5–10 video trial: **fal.ai $10, no credit card** (~6 clips at
   720p), WaveSpeed/Replicate smaller, Higgsfield 24h promos — email only, **no ID check**. They
   are not farming; it's their own paid credit as a lead magnet for a subscription.
-- Reseller adapters (fal.ai, Segmind, WaveSpeed, Replicate) are designed for in `pool.py`
-  (`provider` field) but **not implemented** — only `byteplus` works today. Worth adding if
+- **fal.ai adapter is BUILT** (`src/seedance/providers.py`, 2026-07-27). Segmind / WaveSpeed /
+  Replicate still are not — `pool.py`'s `provider` field is the extension point. Worth adding if
   BytePlus suspends again (the copyright dispute is unresolved; studios sent C&Ds, no lawsuit
   filed yet, but a second suspension is a live tail-risk).
+  Three things about fal that cost real debugging time, so don't rediscover them:
+  **(1)** auth is `Authorization: Key <k>`, not `Bearer`. **(2)** the queue returns its own
+  `status_url`/`response_url` and you **must use them verbatim** — for a nested endpoint fal
+  collapses the trailing path segment (`fal-ai/flux/dev` polls at `fal-ai/flux/requests/<id>`),
+  so a hand-built path 404s on exactly the models we want. The mock in `tests/test_fal.py`
+  reproduces that trap deliberately. **(3)** fal returns **no token usage**, so `usage` stays
+  empty — real spend has to be read off fal's dashboard. Never let it be estimated.
+  `return_last_frame` / `camera_fixed` / `seed` don't exist on fal and are **rejected at submit**
+  rather than dropped; `chain()` refuses outright on a fal-only pool.
+- **fal pricing (posted per-second, output/text-to-video, verified 2026-07-27):** 2.0 720p
+  $0.3034/s · 2.0 1080p $0.682/s · 2.0-fast 720p $0.2419/s · **mini 480p $0.0721/s** · mini 720p
+  $0.1547/s. Mini at 480p is the workhorse that makes a $10 trial into a real test matrix.
+  Confirms the flat 2× vs BytePlus for the flagship.
 - **Pushed and live** (verified 2026-07-27): repo `joshuamorris10451/seedance-batch` PUBLIC at
   HEAD `800ce0c`, brief serving 200 with `noindex,nofollow` + inline-SVG favicon, tests 18/18
   green. Collaborator invites to SilentAurora245 + mary3862jon are **sent but not yet accepted**
