@@ -125,7 +125,11 @@ slow tasks, so pool failover is genuinely exercised.
   (`provider` field) but **not implemented** — only `byteplus` works today. Worth adding if
   BytePlus suspends again (the copyright dispute is unresolved; studios sent C&Ds, no lawsuit
   filed yet, but a second suspension is a live tail-risk).
-- No repo pushed, no release built. Decide account + visibility before pushing.
+- **Pushed and live** (verified 2026-07-27): repo `joshuamorris10451/seedance-batch` PUBLIC at
+  HEAD `800ce0c`, brief serving 200 with `noindex,nofollow` + inline-SVG favicon, tests 18/18
+  green. Collaborator invites to SilentAurora245 + mary3862jon are **sent but not yet accepted**
+  (GitHub personal-repo invites expire after 7 days → re-send if they lapse). No release built —
+  none needed, it's a source repo, not a ZIP handoff.
 - Self-hosting is the other route for real volume: on Bob's planned RTX PRO 6000 + 5090 rig,
   LTX-2.3 / Wan 2.2 run at roughly $0.01/clip marginal, ~500–1,000 clips/day. Rig is still a
   plan, not built. Open-weight quality sits ~250 Elo behind Seedance 2.0 — fine for volume
