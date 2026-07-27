@@ -4,7 +4,19 @@
 ByteDance's Seedance 2.0 (video) and Seedream 5.0 (images) through the official **BytePlus
 ModelArk** API. One key drives both. CSV/JSON in → finished MP4s and PNGs on disk.
 **Status:** BUILT and tested (18/18 end-to-end tests pass against a mock ModelArk server).
-**NOT yet run against a live key — Bob has no BytePlus account yet.** No repo pushed yet.
+**NOT yet run against a live key — Bob has no BytePlus account yet.**
+
+## Live assets
+- **Research brief (LIVE):** https://joshuamorris10451.github.io/seedance-batch/ — noindex.
+- **Repo:** `joshuamorris10451/seedance-batch` (PUBLIC, needed for Pages). Collaborators:
+  SilentAurora245 + mary3862jon. Contains the tool source + the brief in `docs/`.
+- ⚠ **Hosting gotcha, cost me a redo:** I first pushed to `timothywade8452`, whose *user-pages*
+  site has a CNAME to **tryretafit.com** — so the project page served under our RetaFit affiliate
+  domain. Deleted and moved. **Before publishing to any backup account, check
+  `GET /repos/<acct>/<acct>.github.io/contents/CNAME`.** Known contaminated:
+  timothywade8452 → tryretafit.com · joangoodwin10190 → ozem-plus.store ·
+  edwardoliver104 → osanix.shop. Clean at time of writing: joshuamorris10451 (used here),
+  francistucker5374, paulblack6522.
 
 ## Why this shape (the research verdict)
 
@@ -99,9 +111,16 @@ slow tasks, so pool failover is genuinely exercised.
 
 - **Bob has no BytePlus key yet** — nothing has hit the live API. First real run should be a
   single 5s 720p clip to measure true cost from the `usage` block before any volume.
-- Pricing is deliberately NOT quoted anywhere in this project yet — the verification pass was
-  still running when the tool was built. BytePlus bills per token with the count varying by
-  resolution and whether input includes video. Measure it, don't estimate it.
+- **Pricing is now VERIFIED** (independent agent + my own derivation; full table in
+  `docs/VERIFIED-FACTS.md` §5). Headline: **5s @720p = $0.76** on the flagship 2.0, **$1.87 at
+  1080p**, $0.38 on mini, $0.10 on 1.0-pro-fast. Formula
+  `tokens = (in_video_dur + out_dur) × w × h × 24 ÷ 1024`, billed per million, only on success.
+  **Going direct beats every reseller for the 2.0 family** — fal.ai charges exactly 2×.
+  Note the verification *corrected* my own first derivation ($0.69 → $0.76); don't re-derive
+  from the China CNY rate, use the BytePlus USD card.
+- Free tier is **500K tokens/model officially** (byteplus.com markets "2m" on the Seedance page;
+  exact grant is console-only and UNVERIFIED). That's ~4–18 clips of 5s/720p, i.e. a fresh
+  account is worth **$3.50–$14 of footage, once** — the number that kills the farming idea.
 - Reseller adapters (fal.ai, Segmind, WaveSpeed, Replicate) are designed for in `pool.py`
   (`provider` field) but **not implemented** — only `byteplus` works today. Worth adding if
   BytePlus suspends again (the copyright dispute is unresolved; studios sent C&Ds, no lawsuit
