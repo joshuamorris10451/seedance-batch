@@ -21,6 +21,7 @@ except ModuleNotFoundError:  # pragma: no cover
 
 from .client import ARK_CHINA, ARK_INTERNATIONAL
 from .pool import Credential
+from .providers import FAL_QUEUE
 
 DEFAULT_PATHS = (
     pathlib.Path("seedance.toml"),
@@ -30,6 +31,7 @@ DEFAULT_PATHS = (
 PROVIDER_BASE_URLS = {
     "byteplus": ARK_INTERNATIONAL,
     "volcengine": ARK_CHINA,
+    "fal": FAL_QUEUE,
 }
 
 
@@ -155,6 +157,32 @@ def load_credentials(config: dict[str, Any] | None = None) -> list[Credential]:
                     )
                 )
 
+        # fal.ai: FAL_KEY is the variable their own SDK reads, so honour the same name.
+        # This is the zero-friction path — a fal signup needs no card and no ID check.
+        fal_key = os.environ.get("FAL_KEY")
+        if fal_key:
+            creds.append(
+                Credential(
+                    name="fal-env",
+                    api_key=fal_key,
+                    provider="fal",
+                    base_url=FAL_QUEUE,
+                    max_concurrency=int(os.environ.get("FAL_CONCURRENCY", "4")),
+                )
+            )
+        for n in range(1, 21):
+            key = os.environ.get(f"FAL_KEY_{n}")
+            if key:
+                creds.append(
+                    Credential(
+                        name=f"fal-env-{n}",
+                        api_key=key,
+                        provider="fal",
+                        base_url=FAL_QUEUE,
+                        max_concurrency=int(os.environ.get("FAL_CONCURRENCY", "4")),
+                    )
+                )
+
     return creds
 
 
@@ -191,6 +219,17 @@ max_concurrency = 3
 # provider = "byteplus"
 # api_key = "..."
 # max_concurrency = 3
+
+# fal.ai resells Seedance at exactly 2x the BytePlus token rate, so it is the wrong place
+# to buy volume — but a new fal account gets $10 of credit against an email address, with
+# no card and no identity check. That makes it the cheapest way to prove the pipeline works
+# end to end before spending anything. Get a key at https://fal.ai/dashboard/keys
+#
+# [[credentials]]
+# name = "fal-trial"
+# provider = "fal"
+# api_key_env = "FAL_KEY"
+# max_concurrency = 4
 
 [defaults]
 model = "2.0"          # 2.0 | 2.0-fast | 2.0-mini | 1.5-pro

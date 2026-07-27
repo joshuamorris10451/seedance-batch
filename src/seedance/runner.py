@@ -22,13 +22,13 @@ import httpx
 
 from .client import (
     ARK_INTERNATIONAL,
-    SeedanceClient,
     SeedanceError,
     VideoJob,
     VideoResult,
 )
 from .images import ImageJob, ImageResult, SeedreamClient
 from .pool import Credential, CredentialPool
+from .providers import client_for
 
 log = logging.getLogger(__name__)
 
@@ -116,6 +116,7 @@ class BatchRunner:
         ledger: Ledger | None = None,
         download: bool = True,
         progress: Callable[[LedgerEntry], None] | None = None,
+        video_provider: str | None = None,
     ):
         self.pool = pool
         self.output_dir = pathlib.Path(output_dir)
@@ -123,6 +124,9 @@ class BatchRunner:
         self.ledger = ledger or Ledger(self.output_dir / "ledger.jsonl")
         self.download = download
         self.progress = progress
+        # None = spend whatever key is free, BytePlus or reseller. Pin it to one provider
+        # when you are deliberately testing or costing a single route.
+        self.video_provider = video_provider
 
     def _emit(self, entry: LedgerEntry) -> None:
         if self.progress:
@@ -139,15 +143,15 @@ class BatchRunner:
 
         async def call(cred: Credential) -> VideoResult:
             entry.credential = cred.name
-            async with SeedanceClient(
-                cred.api_key, base_url=cred.base_url or ARK_INTERNATIONAL
-            ) as client:
+            # Provider comes off the credential, so a pool can mix BytePlus and reseller
+            # keys and the runner never needs to know which one served a given job.
+            async with client_for(cred.provider, cred.api_key, base_url=cred.base_url) as client:
                 task_id = await client.submit(job)
                 entry.task_id = task_id
                 return await client.wait(task_id)
 
         try:
-            result = await self.pool.run(call, provider="byteplus")
+            result = await self.pool.run(call, provider=self.video_provider)
         except Exception as exc:
             entry.status = "failed"
             entry.error = str(exc)
@@ -269,6 +273,16 @@ class BatchRunner:
         Inherently sequential, so it does not benefit from the pool's concurrency.
         """
         from .client import Reference
+
+        # Chaining needs `return_last_frame`, which only BytePlus implements. Fail here
+        # rather than burning a clip's worth of credit to discover it downstream.
+        if not any(
+            c.provider == "byteplus" and c.available for c in self.pool.credentials
+        ):
+            raise SeedanceError(
+                "chain requires a BytePlus credential: return_last_frame is a BytePlus "
+                "feature and no reseller exposes it"
+            )
 
         entries: list[LedgerEntry] = []
         carry: str | None = None

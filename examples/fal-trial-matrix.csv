@@ -1,0 +1,10 @@
+id,kind,prompt,model,duration,ratio,resolution,audio,first_frame,tag
+t01,video,"a tiler kneeling on a bathroom floor, cutting a tile, dust in the light",2.0-mini,5,9:16,480p,true,,baseline_vertical
+t02,video,"wide shot of a scaffolder on a building frame at sunrise, city behind",2.0-mini,5,16:9,480p,true,,aspect_ratio_16:9
+t03,video,"a welder lowering their mask, sparks starting, shallow depth of field",2.0-mini,5,9:16,720p,true,,resolution_step_480->720
+t04,video,"a plasterer smoothing a wall, slow pan along the finished surface",2.0-mini,10,9:16,480p,true,,duration_10s
+t05,video,"a carpenter planing a board, curls of wood falling",2.0-mini,5,9:16,480p,false,,audio_disabled
+t06,video,the person in the photo turns toward camera and smiles,2.0-mini,5,9:16,480p,true,https://storage.googleapis.com/falserverless/example_inputs/seedance_reference_1.png,image-to-video_path
+t07,video,"an electrician on a ladder at golden hour, warm rim light",2.0-fast,5,9:16,720p,true,,fast_tier
+t08,video,"a mechanic sliding out from under a car on a creeper, grinning",2.0,5,9:16,720p,true,,flagship_quality
+t09,video,"a painter rolling a wall, camera pushes in slowly, late afternoon light",2.0,5,9:16,1080p,true,,1080p_(only_if_budget_allows)

@@ -24,13 +24,16 @@ from .client import (
     ARK_INTERNATIONAL,
     MODEL_LIMITS,
     MODELS,
+    AuthFailed,
     Reference,
     SeedanceClient,
+    SeedanceError,
     VideoJob,
 )
 from .config import EXAMPLE_CONFIG, describe_credentials, load_config, load_credentials
 from .images import IMAGE_MODELS, ImageJob
 from .pool import CredentialPool
+from .providers import FAL_QUEUE, FalClient
 from .runner import BatchRunner, Ledger, LedgerEntry
 
 log = logging.getLogger("seedance")
@@ -145,19 +148,39 @@ async def cmd_check(args: argparse.Namespace) -> int:
     print(f"config: {config.get('_source', 'environment only')}\n")
     print("Credentials:")
     print(describe_credentials(pool.credentials))
-    print("\nProbing each key against BytePlus ModelArk…")
+    print("\nProbing each key against its own provider…")
 
     ok = 0
     for cred in pool.credentials:
-        async with SeedanceClient(
-            cred.api_key, base_url=cred.base_url or ARK_INTERNATIONAL, max_retries=0
-        ) as client:
-            try:
-                await client._request("GET", "/contents/generations/tasks?page_size=1")
-            except Exception as exc:
-                print(f"  ✗ {cred.name}: {exc}")
-                continue
-        print(f"  ✓ {cred.name}: reachable, authenticated")
+        # Probe per provider. A fal key checked against the BytePlus endpoint returns 401
+        # and reads as "dead key", which is exactly the wrong thing to tell someone whose
+        # key is fine.
+        try:
+            if cred.provider == "fal":
+                async with FalClient(
+                    cred.api_key, base_url=cred.base_url or FAL_QUEUE, max_retries=0
+                ) as fclient:
+                    # No list endpoint on the queue API; a HEAD-ish GET on a request id
+                    # that cannot exist distinguishes 401 (bad key) from 404 (key fine).
+                    try:
+                        await fclient._request(
+                            "GET",
+                            f"{fclient.base_url}/fal-ai/any/requests/"
+                            f"00000000000000000000000000000000/status",
+                        )
+                    except SeedanceError as exc:
+                        if isinstance(exc, AuthFailed):
+                            raise
+                        # Anything that is not an auth failure means the key authenticated.
+            else:
+                async with SeedanceClient(
+                    cred.api_key, base_url=cred.base_url or ARK_INTERNATIONAL, max_retries=0
+                ) as client:
+                    await client._request("GET", "/contents/generations/tasks?page_size=1")
+        except Exception as exc:
+            print(f"  ✗ {cred.name} ({cred.provider}): {exc}")
+            continue
+        print(f"  ✓ {cred.name} ({cred.provider}): reachable, authenticated")
         ok += 1
 
     print(f"\n{ok}/{len(pool.credentials)} key(s) working.")
