@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "seedance-batch"
+version = "0.1.0"
+description = "Batch image + video generation on ByteDance Seedance / Seedream via BytePlus ModelArk"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = ["httpx>=0.24"]
+
+[project.optional-dependencies]
+toml = ["tomli>=2.0; python_version<'3.11'"]
+
+[project.scripts]
+seedance = "seedance.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

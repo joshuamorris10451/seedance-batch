@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Seedance 2.0 — what it is, and whether we farm it</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%2312151C'/><rect x='6' y='9' width='14' height='14' rx='2' fill='%23FFB020'/><path d='M22 12l5-3v14l-5-3z' fill='%23FF4D8D'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#12151C; --panel:#181D28; --panel2:#1F2534; --line:#2E3648;
+  --text:#E7EAF1; --muted:#8B95AA; --dim:#5C667C;
+  --amber:#FFB020; --magenta:#FF4D8D; --teal:#3ED6C5;
+  --disp:"IBM Plex Sans Condensed",system-ui,sans-serif;
+  --body:"IBM Plex Sans",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,monospace;
+  --wrap:1080px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
+body{margin:0;background:var(--ink);color:var(--text);font-family:var(--body);font-size:16.5px;line-height:1.65;-webkit-font-smoothing:antialiased}
+.wrap{max-width:var(--wrap);margin:0 auto;padding:0 24px}
+a{color:var(--amber)}
+h1,h2,h3{font-family:var(--disp);font-weight:700;letter-spacing:-.015em;line-height:1.05;margin:0}
+code,.m{font-family:var(--mono);font-size:.86em}
+
+/* ── timecode section markers ───────────────────────────── */
+.tc{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--dim);
+    text-transform:uppercase;display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.tc::after{content:"";flex:1;height:1px;background:var(--line)}
+
+/* ── hero ───────────────────────────────────────────────── */
+.hero{padding:72px 0 56px;border-bottom:1px solid var(--line);position:relative;overflow:hidden}
+.hero::before{content:"";position:absolute;inset:0;
+  background:radial-gradient(900px 320px at 12% -10%,rgba(255,176,32,.10),transparent 70%);pointer-events:none}
+.kicker{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--amber);margin-bottom:20px}
+h1{font-size:clamp(38px,7.2vw,78px);text-transform:uppercase}
+h1 em{font-style:normal;color:var(--amber)}
+.sub{max-width:60ch;color:var(--muted);font-size:19px;margin-top:22px}
+.verdicts{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:14px;margin-top:38px}
+.v{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--c,var(--amber));padding:16px 18px;border-radius:3px}
+.v b{display:block;font-family:var(--disp);font-size:20px;letter-spacing:0;margin-bottom:4px}
+.v span{font-size:14px;color:var(--muted);line-height:1.5;display:block}
+.no{--c:var(--magenta)} .yes{--c:var(--teal)}
+
+section{padding:60px 0;border-bottom:1px solid var(--line)}
+h2{font-size:clamp(26px,3.6vw,38px);text-transform:uppercase;margin-bottom:8px}
+.lede{color:var(--muted);max-width:70ch;margin:14px 0 30px;font-size:17px}
+p{max-width:72ch}
+
+/* ── signature: seconds-of-video ladder ─────────────────── */
+.ladder{margin:34px 0 8px;background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:26px 24px 18px}
+.rulerrow{display:grid;grid-template-columns:190px 1fr;gap:16px;margin-bottom:2px}
+.ruler{position:relative;height:22px;border-bottom:1px solid var(--line)}
+.ruler i{position:absolute;bottom:0;width:1px;height:7px;background:var(--line)}
+.ruler i.maj{height:13px;background:var(--dim)}
+.ruler b{position:absolute;bottom:15px;transform:translateX(-50%);font-family:var(--mono);
+  font-size:10px;color:var(--dim);font-weight:400;letter-spacing:.06em;white-space:nowrap}
+.row{display:grid;grid-template-columns:190px 1fr;gap:16px;align-items:center;padding:9px 0}
+.row .lab{font-family:var(--mono);font-size:12.5px;color:var(--muted);text-align:right;line-height:1.35}
+.row .lab s{display:block;color:var(--dim);text-decoration:none;font-size:11px}
+.bar{position:relative;height:26px;background:linear-gradient(90deg,rgba(255,255,255,.035),rgba(255,255,255,.015));border-radius:2px}
+.bar u{position:absolute;left:0;top:0;bottom:0;border-radius:2px;background:var(--bc,var(--amber));
+  display:block;animation:grow .9s cubic-bezier(.2,.8,.25,1) both}
+@keyframes grow{from{transform:scaleX(0);transform-origin:left}to{transform:scaleX(1);transform-origin:left}}
+.bar em{position:absolute;top:50%;transform:translateY(-50%);left:calc(var(--w) + 10px);
+  font-family:var(--mono);font-size:12px;font-style:normal;color:var(--text);white-space:nowrap}
+/* A bar at or near full width has no room to the right — sit the label inside it. */
+.bar em.inside{left:auto;right:10px;color:var(--ink);font-weight:600}
+.bar em b{font-weight:600;color:var(--amber)}
+.bar em.inside b{color:var(--ink)}
+.foot{font-size:13.5px;color:var(--dim);margin-top:16px;border-top:1px solid var(--line);padding-top:14px;max-width:none}
+
+/* ── tables ─────────────────────────────────────────────── */
+.scroll{overflow-x:auto;margin:26px 0;border:1px solid var(--line);border-radius:4px}
+table{border-collapse:collapse;width:100%;min-width:640px;font-size:14.5px}
+th{background:var(--panel2);font-family:var(--mono);font-size:11px;letter-spacing:.13em;
+   text-transform:uppercase;color:var(--muted);text-align:left;padding:12px 14px;font-weight:500;white-space:nowrap}
+td{padding:12px 14px;border-top:1px solid var(--line);vertical-align:top}
+tbody tr:nth-child(odd){background:rgba(255,255,255,.014)}
+td.mono,th.mono{font-family:var(--mono);font-size:12.8px}
+.tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;
+  padding:2px 7px;border-radius:2px;border:1px solid;white-space:nowrap}
+.t-go{color:var(--teal);border-color:rgba(62,214,197,.4);background:rgba(62,214,197,.08)}
+.t-no{color:var(--magenta);border-color:rgba(255,77,141,.4);background:rgba(255,77,141,.08)}
+.t-wait{color:var(--amber);border-color:rgba(255,176,32,.4);background:rgba(255,176,32,.08)}
+
+/* ── callouts / lists ───────────────────────────────────── */
+.note{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--amber);
+  padding:18px 20px;border-radius:3px;margin:26px 0}
+.note.bad{border-left-color:var(--magenta)}
+.note.good{border-left-color:var(--teal)}
+.note h4{font-family:var(--disp);font-size:17px;margin:0 0 7px;letter-spacing:0}
+.note p{margin:0;font-size:15px;color:var(--muted);max-width:none}
+.note p+p{margin-top:9px}
+ul.clean{list-style:none;padding:0;margin:22px 0}
+ul.clean li{padding:11px 0 11px 26px;border-top:1px solid var(--line);position:relative;color:var(--muted);font-size:15.5px}
+ul.clean li::before{content:"→";position:absolute;left:0;color:var(--amber);font-family:var(--mono)}
+ul.clean li b{color:var(--text);font-weight:600}
+pre{background:#0C0F15;border:1px solid var(--line);border-radius:4px;padding:16px 18px;
+  overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.7;color:#C9D2E4;margin:20px 0}
+pre .c{color:var(--dim)}
+pre .k{color:var(--amber)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:26px 0}
+@media(max-width:760px){
+  .grid2{grid-template-columns:1fr}
+  .row{grid-template-columns:1fr;gap:5px}
+  .row .lab{text-align:left}
+  .bar em{position:static;transform:none;display:block;margin-top:4px}
+  .bar{height:20px}
+}
+footer{padding:44px 0 64px;color:var(--dim);font-size:13.5px}
+footer b{color:var(--muted)}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="kicker">Research brief · 27 July 2026</div>
+    <h1>Seedance is real.<br>The <em>free-credit farm</em> is not.</h1>
+    <p class="sub">ByteDance's Seedance 2.0 is currently the #2 video model in the world and it is
+      reachable from here today, legitimately, for cents. The bulk-account tooling around it is
+      selling a shortcut around a wall that isn't there.</p>
+
+    <div class="verdicts">
+      <div class="v yes"><b>Seedance 2.0</b><span>The working version. Live on BytePlus ModelArk, 190+ countries, no Chinese phone needed.</span></div>
+      <div class="v"><b>Seedance 2.5</b><span>Announced 23 Jun. China-first. Not in the international model list yet — don't build on it.</span></div>
+      <div class="v no"><b>Account farming</b><span>A farmed account is worth $3.50–$14 of footage, once. Then it's dead.</span></div>
+      <div class="v yes"><b>Shipped</b><span>A batch tool: spreadsheet in, finished MP4s out. 18/18 tests pass.</span></div>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <div class="tc">00:00 · the model</div>
+    <h2>What Seedance 2.0 actually is</h2>
+    <p class="lede">Launched in China 12 February 2026. Native <b>synchronised audio</b> — dialogue,
+      foley and ambience generated in the same pass as the picture, which Veo and Kling still
+      largely bolt on. Up to 15 seconds, multi-shot with real cuts inside a single generation, and
+      it accepts up to <b>9 images, 3 video clips and 3 audio clips</b> as references at once.</p>
+
+    <div class="note good">
+      <h4>It beats what we're already using</h4>
+      <p>On the Artificial Analysis leaderboards it sits <b>#2 for both text-to-video and
+      image-to-video</b> — ahead of Veo 3.1 and Kling 3.0, behind only Google's Gemini Omni Flash.
+      Our <code>veo-flow-multi</code> rig drives Veo 3.1. This is a straight upgrade on quality,
+      and unlike Flow it has an actual API.</p>
+    </div>
+
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Alias</th><th class="mono">Model ID (BytePlus)</th><th>Resolution</th><th>Length</th><th>Concurrent</th></tr></thead>
+        <tbody>
+          <tr><td><b>2.0</b></td><td class="mono">dreamina-seedance-2-0-260128</td><td>480p · 720p · 1080p · 4K</td><td>4–15s</td><td>3</td></tr>
+          <tr><td>2.0-fast</td><td class="mono">dreamina-seedance-2-0-fast-260128</td><td>480p · 720p</td><td>4–15s</td><td>3</td></tr>
+          <tr><td>2.0-mini</td><td class="mono">dreamina-seedance-2-0-mini-260615</td><td>480p · 720p</td><td>4–15s</td><td>3</td></tr>
+          <tr><td>1.5-pro</td><td class="mono">seedance-1-5-pro-251215</td><td>480p · 720p · 1080p</td><td>4–12s</td><td>10</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="font-size:14.5px;color:var(--dim)">Pulled from the live BytePlus model list, not from blogs.
+      Half the SEO sites claim Seedance 2.0 can't do 1080p — wrong: only <em>fast</em> and <em>mini</em>
+      are capped at 720p. Concurrency is for individual accounts; enterprise gets 10. 4K is throttled
+      to 1 concurrent task for everyone.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="tc">00:06 · the arithmetic that decides it</div>
+    <h2>What a clip actually costs</h2>
+    <p class="lede">Every price here is printed on BytePlus's own rate card or derived from their
+      published token formula, which I confirmed reproduces their numbers exactly. One five-second
+      clip at 720p, sound included, 16:9 — the same job priced across the range.</p>
+
+    <div class="ladder">
+      <div class="rulerrow" aria-hidden="true"><div></div>
+      <div class="ruler">
+        <b style="left:0">$0</b><i class="maj" style="left:0"></i>
+        <i style="left:13.4%"></i>
+        <b style="left:26.7%">$0.50</b><i class="maj" style="left:26.7%"></i>
+        <i style="left:40.1%"></i>
+        <b style="left:53.5%">$1.00</b><i class="maj" style="left:53.5%"></i>
+        <i style="left:66.8%"></i>
+        <b style="left:80.2%">$1.50</b><i class="maj" style="left:80.2%"></i>
+        <i style="left:93.6%"></i>
+        <b style="left:100%">$1.87</b><i class="maj" style="left:100%"></i>
+      </div></div>
+
+      <div class="row">
+        <div class="lab">1.0-pro-fast<s>no audio, older model</s></div>
+        <div class="bar"><u style="--w:5.3%;width:5.3%;--bc:var(--teal);animation-delay:.05s"></u><em style="--w:5.3%">$0.10</em></div>
+      </div>
+      <div class="row">
+        <div class="lab">1.5-pro<s>with audio</s></div>
+        <div class="bar"><u style="--w:13.9%;width:13.9%;--bc:var(--teal);animation-delay:.12s"></u><em style="--w:13.9%">$0.26</em></div>
+      </div>
+      <div class="row">
+        <div class="lab">2.0-mini<s>720p max</s></div>
+        <div class="bar"><u style="--w:20.3%;width:20.3%;animation-delay:.19s"></u><em style="--w:20.3%">$0.38</em></div>
+      </div>
+      <div class="row">
+        <div class="lab">2.0-fast<s>720p max</s></div>
+        <div class="bar"><u style="--w:32.1%;width:32.1%;animation-delay:.26s"></u><em style="--w:32.1%">$0.60</em></div>
+      </div>
+      <div class="row">
+        <div class="lab">2.0 flagship<s>the #2 model in the world</s></div>
+        <div class="bar"><u style="--w:40.6%;width:40.6%;--bc:var(--amber);animation-delay:.33s"></u><em style="--w:40.6%"><b>$0.76</b></em></div>
+      </div>
+      <div class="row">
+        <div class="lab">2.0 at 1080p</div>
+        <div class="bar"><u style="--w:100%;width:100%;--bc:var(--amber);animation-delay:.4s"></u><em class="inside">$1.87</em></div>
+      </div>
+      <div class="row">
+        <div class="lab">2.0 via fal.ai<s>reseller markup</s></div>
+        <div class="bar"><u style="--w:81.3%;width:81.3%;--bc:var(--magenta);animation-delay:.47s"></u><em style="--w:81.3%">$1.52 — exactly 2×</em></div>
+      </div>
+
+      <p class="foot">Formula: <span class="m">tokens = width × height × 24 × seconds ÷ 1024</span>,
+        billed per million and only on success. A 1080p five-second clip is 243,000 tokens at
+        $7.70/M = $1.87 — the exact figure BytePlus prints. Worth knowing: <b>going direct is the
+        cheapest route for the 2.0 family</b>. fal.ai charges precisely double the official token
+        rate, WaveSpeed ~60% over, Kie ~35% over.</p>
+    </div>
+
+    <div class="note bad">
+      <h4>So what is a farmed account actually worth?</h4>
+      <p>Officially BytePlus grants <b>500,000 free tokens per model</b>; their Seedance page markets
+        "2m tokens". Run that through the same formula and a fresh account yields somewhere between
+        <b>4 and 18 clips</b> of 5s/720p — call it <b>$3.50 to $14 of footage, once</b>. Then the
+        account is spent and worth nothing.</p>
+      <p>Now price acquiring it. Multilogin — a company that <em>sells</em> the anti-detection tooling —
+        publishes a <b>40% success rate</b> for creating a single Google-class account with their paid
+        product, under 1% without. So ~2.5 attempts per durable account. Then the costs <em>recur
+        monthly</em>: a residential IP per account, an antidetect browser seat, and phone numbers that
+        stop being accepted after about fifteen uses.</p>
+      <p>You are renting infrastructure indefinitely to chase a one-time $14 — and the same $14 buys
+        18 clips outright, with no watermark, at full resolution, in about a minute.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="tc">00:24 · the tools you saw</div>
+    <h2>What's actually being sold</h2>
+    <p class="lede">I went looking for the tools. They sort into three piles, and only one of them
+      does anything.</p>
+
+    <ul class="clean">
+      <li><b>Multi-account managers — real, and useless for this.</b> Projects like
+        <code>jimeng-api</code> wrap Dreamina's web session into an API and rotate between tokens.
+        They work. But every one of them requires you to <em>already own</em> the accounts and burns
+        <em>your</em> credits. They create nothing.</li>
+      <li><b>Account creators — real code, doesn't survive contact.</b> The public ones are ~20-star
+        weekend projects with no CAPTCHA solving, no proxy rotation, and public temp-mail addresses.
+        Their own READMEs admit the site changes and breaks them.</li>
+      <li><b>Scams and malware — the biggest pile by volume.</b> Check Point documented a campaign of
+        ~70 sponsored Facebook ads driving to convincing fake Kling AI sites; the "generated video"
+        download was a RAT that watched 50+ crypto wallet extensions. Attacks using malware disguised
+        as AI tools ran 33,000+ in the first four months of 2026, roughly five times all of 2025.</li>
+      <li><b>Fake Seedance resellers are a named category.</b> Three flavours: reverse-engineered
+        Dreamina wrappers on shared pooled accounts, <em>Seedance 1.5 misbranded as 2.0</em> (tell:
+        no native audio, 10s cap instead of 15s), and pure fraud with no model behind it.</li>
+    </ul>
+
+    <div class="note bad">
+      <h4>The specific reason you shouldn't, Bob</h4>
+      <p>Platforms link accounts by device fingerprint, IP reputation and <b>payment fingerprint</b> —
+        including cards from the same issuer and patterns in top-up timing. Google's own terms let it
+        delete the entire Google Account, and a multi-account ban cascades to anything sharing a
+        device, IP or card.</p>
+      <p>You run client Google Ads — RingOnDemand, LendPeak, the GCALIT MCC. The downside here isn't
+        losing a throwaway. It's a ban that reaches accounts you don't own and can't afford to
+        explain. That risk is not worth seven cents a second.</p>
+    </div>
+
+    <div class="note">
+      <h4>And when farming does work, it kills the thing</h4>
+      <p>Midjourney is the precedent. Its CEO, on the record: <em>"We stopped trials because of massive
+        amounts of people making throwaway accounts to get free images."</em> The free tier didn't get
+        cheaper. It got removed, permanently, for everyone.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="tc">00:38 · shipped</div>
+    <h2>What I built instead</h2>
+    <p class="lede">A standalone batch tool that does the part you actually wanted — hundreds of
+      images and videos without babysitting a browser tab — using keys you legitimately hold.
+      One key drives both video (Seedance 2.0) and images (Seedream 5.0).</p>
+
+<pre><span class="c"># set up once</span>
+seedance init
+seedance check          <span class="c"># verifies the key, lists models + your concurrency</span>
+
+<span class="c"># then point it at a spreadsheet and walk away</span>
+seedance batch jobs.csv</pre>
+
+    <div class="grid2">
+      <div class="note good">
+        <h4>Resume is free</h4>
+        <p>Every state change lands in a JSONL ledger. Kill it, close the laptop, lose the wifi —
+          re-run the same command and it skips what finished and retries only what didn't.</p>
+      </div>
+      <div class="note good">
+        <h4>It refuses bad rows before they cost money</h4>
+        <p>Model limits are enforced client-side. A row asking 1080p from the <em>fast</em> model is
+          rejected for free, printed, and counted — never silently dropped.</p>
+      </div>
+      <div class="note good">
+        <h4>Clips longer than 15 seconds</h4>
+        <p>Seedance can return the final frame of a clip. <code>seedance chain</code> feeds it into
+          the next one as the opening frame, so five prompts become a continuous 50-second sequence
+          instead of five hard cuts.</p>
+      </div>
+      <div class="note good">
+        <h4>Concurrency is the real ceiling</h4>
+        <p>An individual key allows 180 requests a minute but only <b>3 jobs at once</b>. The runner
+          keeps all three slots full, spreads across multiple keys if you hold them, and reroutes
+          when one dies.</p>
+      </div>
+    </div>
+
+    <p style="font-size:14.5px;color:var(--dim)">Cost is always read back from the API's own usage
+      figures. Nothing in the tool estimates a price. 18 end-to-end tests pass against a mock server
+      that reproduces throttling, quota exhaustion and revoked keys — no API key needed to run them.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="tc">00:52 · next</div>
+    <h2>What I need from you</h2>
+    <ul class="clean">
+      <li><b>A BytePlus account.</b> Email plus an international card, no Chinese phone. That's the
+        only blocker — nothing has touched the live API yet. I'll do the setup if you'd rather;
+        I just can't create the account or enter the card.</li>
+      <li><b>Then one test clip.</b> A single 5s 720p generation measures the true cost from the
+        API's own usage figures before we commit to any volume.</li>
+      <li><b>Decide the fallback.</b> The copyright fight is unresolved — Disney, Warner, Paramount,
+        Netflix and Sony all sent cease-and-desist letters and the overseas API was already suspended
+        once, in March. Resellers (fal.ai, Segmind, WaveSpeed) would break the same day BytePlus does.
+        The tool has the slot for them; say the word and I'll wire them in.</li>
+      <li><b>Longer term, the rig wins.</b> Once the PRO 6000 + 5090 box exists, open-weight models
+        run at roughly a cent a clip with no per-second bill at all — a few hundred clips a month is
+        a couple of hours of runtime. Quality sits meaningfully behind Seedance, so it's the volume
+        lane, not the hero-shot lane.</li>
+    </ul>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <b>Sources.</b> Model IDs, capability matrix, rate limits and the token formula were pulled
+    directly from the live BytePlus ModelArk docs and cross-checked against the parameter set in
+    ByteDance's own published SDK. Leaderboard positions from Artificial Analysis. Launch and
+    suspension dates from seed.bytedance.com, Axios, Deadline and TechCrunch. Account-creation
+    success rates from Multilogin's own published figures; the malware campaign from Check Point
+    Research. Sites in the <span class="m">seedance2.so</span> / <span class="m">easemate</span> /
+    <span class="m">gamsgo</span> cluster are affiliate SEO spam and were not relied on — several
+    contradict the official docs outright.
+    <br><br>
+    Prepared 27 July 2026. Not indexed.
+  </div>
+</footer>
+
+</body>
+</html>

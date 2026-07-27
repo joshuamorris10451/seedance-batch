@@ -1,0 +1,17 @@
+# your API keys live here — never commit
+seedance.toml
+config.toml
+
+# outputs
+out/
+*.mp4
+*.png
+!docs/*.png
+
+# python
+build/
+dist/
+*.egg-info/
+__pycache__/
+*.pyc
+.venv/

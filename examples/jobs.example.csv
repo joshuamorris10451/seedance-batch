@@ -1,0 +1,4 @@
+id,kind,prompt,duration,ratio,resolution,camera_fixed,first_frame,tag
+v1,video,"a welder in a workshop, sparks flying, shallow depth of field",5,9:16,720p,true,,welder
+v2,video,"an electrician on a ladder at golden hour, warm rim light",10,9:16,720p,false,,electrician
+i1,image,"portrait of a carpenter in a sunlit workshop, studio lighting",,,,,,carpenter
