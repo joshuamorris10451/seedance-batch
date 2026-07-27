@@ -80,15 +80,34 @@ So: **pool API keys you actually hold** (ordinary rate management), don't create
   auto-disable on auth failure / hard quota, cooldown on transient 429.
 - `src/seedance/runner.py` — JSONL ledger → **free resume**; a generation that succeeds but
   fails to download keeps its URL and is NOT marked failed (it was already paid for).
+- `src/seedance/client.py` poll cap: `wait()` backs off ×1.25 to a **cap of 8s, not 20s**
+  (changed 2026-07-27). A finished task holds one of the key's 3 slots until the poller notices,
+  so a long interval is throughput thrown away: at the old 20s cap a 90s generation was detected
+  17.6s late = **19.5% of the slot wasted**; at 8s the worst case is 4.6%. Costs 22 req/min/key
+  against a 180 RPM allowance. Guarded by a virtual-clock check in `scale_test.py` that fails
+  above 6% — confirmed to actually fail at the old cap, so it isn't a rubber stamp.
 - `src/seedance/config.py` — includes a **minimal TOML parser fallback** because Python 3.10
   has no `tomllib` and Bob's Windows box may lack `tomli`. Zero hard deps beyond `httpx`.
 - Cost is always read from the API's own `usage` block. **Nothing estimates a price.**
 
 ## Testing
 
-`python tests/test_pipeline.py` → 18 tests, no key or network needed. `tests/mock_ark.py`
+`python3 tests/test_pipeline.py` → 18 tests, no key or network needed. `tests/mock_ark.py`
 reproduces the documented wire format plus 429 throttling, quota exhaustion, revoked keys and
 slow tasks, so pool failover is genuinely exercised.
+
+`python3 tests/scale_test.py` → **throughput harness, added 2026-07-27**. Answers "how far can
+batch generation go" without a key or an account. Its mock (unlike `mock_ark.py`) **enforces the
+3-concurrent-per-key cap**, rejecting a 4th simultaneous task with a 429, because concurrency is
+the real ceiling. Result: 1→16 keys, 12→192 jobs, **every job completed, pool saturated every
+slot (peak == keys×3), zero server rejections** — the client self-limits rather than firing and
+getting bounced. Throughput is linear in key count; there is no client-side cleverness available.
+
+⚠ **Do NOT read the "% of theoretical" column as a tool finding.** It falls 77%→39% as keys rise,
+but a control run (16 keys, generation time 1s→8s at constant concurrency) recovers it to 72% —
+that ceiling is the Python `ThreadingHTTPServer` saturating on request rate, not the runner.
+Also: the mock must be `ThreadingHTTPServer`; plain `HTTPServer` serialises the keep-alive
+connections the runner holds per in-flight job and stalls the whole run.
 
 ## Dead ends / gotchas — do NOT redo
 

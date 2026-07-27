@@ -363,6 +363,46 @@ footer b{color:var(--muted)}
         for a BytePlus key.</p>
     </div>
 
+    <div class="note good">
+      <h4>You don't need extra accounts to test the ceiling</h4>
+      <p>Testing throughput and producing volume are separate problems, and only the second one
+        needs accounts. <code>tests/scale_test.py</code> runs the <em>real</em> pool and runner
+        against a server that enforces the same 3-concurrent-per-key cap BytePlus does, rejecting
+        a 4th simultaneous task with the same 429. No key, no account, no cost:</p>
+      <div class="scroll">
+      <table>
+        <thead><tr><th>Keys</th><th>Jobs</th><th>Completed</th><th>Peak concurrent</th><th>Server rejections</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>12</td><td>12</td><td>3 / 3</td><td>0</td></tr>
+          <tr><td>2</td><td>24</td><td>24</td><td>6 / 6</td><td>0</td></tr>
+          <tr><td>4</td><td>48</td><td>48</td><td>12 / 12</td><td>0</td></tr>
+          <tr><td>8</td><td>96</td><td>96</td><td>24 / 24</td><td>0</td></tr>
+          <tr><td>16</td><td>192</td><td>192</td><td>48 / 48</td><td>0</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p>Every job completed, the pool saturated every available slot, and the cap was never
+        breached — <b>zero server rejections means the client self-limited correctly</b> rather than
+        firing and getting bounced. So the answer to "how far can it go" is: as far as your key
+        count, linearly, with no scheduling losses.</p>
+    </div>
+
+    <div class="note">
+      <h4>What the scale test caught</h4>
+      <p>A finished task still occupies one of the key's 3 slots until the client notices. The
+        poller backed off up to 20s between checks, so a 90s generation was detected <b>17.6s
+        late — 19.5% of the slot thrown away</b>. Capping the interval at 8s cuts the worst case to
+        <b>4.6%</b>, and polling 3 in-flight tasks every 8s is 22 requests/min against an individual
+        key's 180 RPM allowance — 12% of a budget that was never the constraint.</p>
+      <p>Fixed, with a regression guard that drives the real <code>wait()</code> loop on a virtual
+        clock and fails the build above 6%. Verified to fail at the old setting, so it isn't a
+        rubber stamp.</p>
+      <p class="foot">Honest caveat: the percentage-of-theoretical column in the raw scale run
+        degrades from 77% to 39% as keys rise, but a control run showed that recovering to 72%
+        simply by slowing generation at the same concurrency — that ceiling is the Python mock
+        server saturating on request rate, <em>not</em> the tool. Not reported as a finding.</p>
+    </div>
+
     <div class="note bad">
       <h4>What has not changed</h4>
       <p>None of this scales. Free credit is a way to <em>evaluate</em> the model for nothing, not a
